@@ -1,7 +1,7 @@
 /* ============================================================
    Adnan Abdul Salam — Portfolio
-   Aesthetic: refined dark "tech control room" — deep ink black,
-   luminous mint accent, characterful Clash Display headings.
+   Aesthetic: cinematic warm — deep espresso-brown background, cream text,
+   golden accent, characterful Clash Display headings.
    ============================================================ */
 
 :root {
@@ -11,7 +11,7 @@
   --line:      rgba(240,224,190,.10);
   --text:      #f2e7cd;       /* warm cream */
   --muted:     #c2b291;       /* taupe (lightened for readability) */
-  --faint:     #9c8a6a;       /* meets WCAG AA on the dark bg */
+  --faint:     #ab9a78;       /* meets WCAG AA on the dark bg (safer margin) */
   --accent:    #e8b53e;       /* bold golden-yellow */
   --accent-2:  #c98a3a;       /* warm amber, used sparingly */
   --glow:      rgba(232,181,62,.35);
@@ -120,6 +120,11 @@ h1, h2, h3 { font-family: "Clash Display", sans-serif; font-weight: 600; line-he
 .hero__role { font-size: clamp(1.1rem, 2.4vw, 1.6rem); color: var(--text); font-weight: 500; margin-bottom: 18px; }
 .hero__sub { max-width: 56ch; color: var(--muted); font-size: 1.02rem; margin-bottom: 38px; }
 .hero__actions { display: flex; gap: 16px; flex-wrap: wrap; }
+/* keep hero copy in a left column (split-hero balance) + choreograph the reveal */
+.hero__role, .hero__sub { max-width: 600px; }
+.hero__role.reveal { transition-delay: .28s; }
+.hero__sub.reveal { transition-delay: .40s; }
+.hero__actions.reveal { transition-delay: .52s; }
 
 .btn {
   display: inline-flex; align-items: center; gap: 8px;
@@ -151,17 +156,27 @@ h1, h2, h3 { font-family: "Clash Display", sans-serif; font-weight: 600; line-he
 
 /* ---------- ABOUT ---------- */
 .about__grid { display: grid; grid-template-columns: minmax(220px, 300px) 1fr; gap: clamp(28px, 4vw, 60px); align-items: start; }
-.about__portrait { position: relative; }
+.about__portrait { position: relative; isolation: isolate; }
 .about__portrait img {
-  width: 100%; aspect-ratio: 1; object-fit: cover; display: block;
-  border-radius: 20px;
-  border: 1px solid rgba(232,181,62,.35);
+  width: 100%; aspect-ratio: 1; object-fit: cover; object-position: 50% 28%; display: block;
+  border-radius: 16px;
+  border: 1px solid rgba(232,181,62,.22);
   box-shadow: 0 20px 55px rgba(0,0,0,.55);
+  filter: saturate(0.92) contrast(1.03) brightness(0.97);
   transition: transform .45s var(--ease), box-shadow .45s var(--ease);
 }
+/* ::before = espresso color wash to neutralise the cool grey-green background (hue work) */
+.about__portrait::before {
+  content: ""; position: absolute; inset: 0; border-radius: 16px; pointer-events: none;
+  z-index: 1; mix-blend-mode: color; opacity: .22;
+  background: linear-gradient(160deg, #3a2c16 0%, #241803 100%);
+}
+/* ::after = vignette to seat the figure into the dark page */
 .about__portrait::after {
-  content: ""; position: absolute; inset: 0; border-radius: 20px; pointer-events: none;
-  background: linear-gradient(180deg, rgba(232,181,62,.06) 0%, transparent 35%, rgba(8,5,3,.45) 100%);
+  content: ""; position: absolute; inset: 0; border-radius: 16px; pointer-events: none; z-index: 2;
+  background:
+    linear-gradient(180deg, transparent 45%, rgba(8,5,3,.55) 100%),
+    radial-gradient(120% 90% at 50% 30%, transparent 55%, rgba(8,5,3,.40) 100%);
 }
 .about__portrait:hover img { transform: translateY(-5px); box-shadow: 0 26px 70px rgba(232,181,62,.16); }
 .about__text { display: flex; flex-direction: column; gap: 18px; }

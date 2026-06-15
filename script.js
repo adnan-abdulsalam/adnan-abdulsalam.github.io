@@ -25,7 +25,7 @@
   const GOLD = new THREE.Color("#e8b53e");
   const mat = new THREE.MeshBasicMaterial({ color: GOLD });
 
-  const S = 0.78, CY = 1.1, R = 0.04; // scale, vertical centre, stroke radius
+  const S = 0.66, CY = 1.1, R = 0.04; // scale, vertical centre, stroke radius
   const group = new THREE.Group();
   scene.add(group);
 
@@ -132,8 +132,8 @@
   });
 
   // sit to the right and lower so the antlers clear the headline
-  const targetOffsetX = () => (window.innerWidth > 860 ? 4.0 : 0);
-  const BASE_Y = -1.25;
+  const targetOffsetX = () => (window.innerWidth > 1200 ? 5.6 : window.innerWidth > 860 ? 4.6 : 0);
+  const BASE_Y = -1.05;
 
   const clock = new THREE.Clock();
   function animate() {
@@ -144,16 +144,16 @@
 
     const sway = reduce ? 0 : 1;
     // keep the delightful mouse parallax; calm the idle motion
-    group.rotation.y = mouse.x * 0.7 + Math.sin(t * 0.35) * 0.18 * sway;
-    group.rotation.x = -mouse.y * 0.26 + Math.sin(t * 0.5) * 0.04 * sway;
+    group.rotation.y = mouse.x * 0.5 + Math.sin(t * 0.35) * 0.12 * sway;
+    group.rotation.x = -mouse.y * 0.22 + Math.sin(t * 0.5) * 0.04 * sway;
     group.position.x += (targetOffsetX() - group.position.x) * 0.05;
     group.position.y = BASE_Y + Math.sin(t * 0.6) * 0.08 * sway;
     group.scale.setScalar(1 + Math.sin(t * 0.9) * 0.014);
 
     field.rotation.y = t * 0.02 * sway;
 
-    camera.position.x += (mouse.x * 0.4 - camera.position.x) * 0.05;
-    camera.position.y += (-mouse.y * 0.4 - camera.position.y) * 0.05;
+    camera.position.x += (mouse.x * 0.12 - camera.position.x) * 0.05;
+    camera.position.y += (-mouse.y * 0.25 - camera.position.y) * 0.05;
     camera.lookAt(scene.position);
 
     renderer.render(scene, camera);
