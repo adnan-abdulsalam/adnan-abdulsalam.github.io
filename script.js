@@ -23,9 +23,24 @@
   renderer.setSize(window.innerWidth, window.innerHeight);
 
   const GOLD = new THREE.Color("#e8b53e");
+  const GOLD_BRIGHT = new THREE.Color("#ffd87a");
+  const CORE_HOT = new THREE.Color("#fff2cf");
   const mat = new THREE.MeshBasicMaterial({ color: GOLD });
+  const coreMat = new THREE.MeshBasicMaterial({ color: CORE_HOT }); // hot lit node cores
 
-  const S = 0.66, CY = 1.1, R = 0.04; // scale, vertical centre, stroke radius
+  // soft radial sprite → glowing circuit nodes
+  const glowTex = (() => {
+    const c = document.createElement("canvas"); c.width = c.height = 64;
+    const x = c.getContext("2d");
+    const grd = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+    grd.addColorStop(0, "rgba(255,228,160,1)");
+    grd.addColorStop(0.28, "rgba(232,181,62,0.8)");
+    grd.addColorStop(1, "rgba(232,181,62,0)");
+    x.fillStyle = grd; x.fillRect(0, 0, 64, 64);
+    return new THREE.CanvasTexture(c);
+  })();
+
+  const S = 0.68, CY = 1.1, R = 0.034; // scale, vertical centre, stroke radius (slimmer = circuit traces)
   const group = new THREE.Group();
   scene.add(group);
 
@@ -85,7 +100,7 @@
   const isRight = (n) => n.startsWith("r_") || n.startsWith("ab") || n.startsWith("t_");
   const toV = (p) => new THREE.Vector3(p[0] * S, (p[1] - CY) * S, (p[2] || 0) * S);
   const cap = (v) => {
-    const s = new THREE.Mesh(new THREE.SphereGeometry(R, 8, 8), mat);
+    const s = new THREE.Mesh(new THREE.SphereGeometry(R * 1.25, 8, 8), coreMat);
     s.position.copy(v);
     group.add(s);
   };
@@ -107,13 +122,31 @@
       usedKeys.add(`${n2}|${isRight(n2) ? s : 1}`);
     }
   }
-  // rounded caps at every joint
+  // bright node cores + collect positions for the glowing circuit nodes
+  const nodePts = [];
   usedKeys.forEach((k) => {
     const [name, s] = k.split("|");
     const p = P[name].slice();
     if (isRight(name)) p[0] *= Number(s);
-    cap(toV(p));
+    const v = toV(p);
+    cap(v);
+    nodePts.push(v);
   });
+
+  // glowing circuit-node halos (additive neon glow, pulses in animate())
+  const glowGeo = new THREE.BufferGeometry().setFromPoints(nodePts);
+  // tight bright halo
+  const glowMat = new THREE.PointsMaterial({
+    map: glowTex, color: GOLD_BRIGHT, size: 0.34, sizeAttenuation: true,
+    blending: THREE.AdditiveBlending, transparent: true, opacity: 0.55, depthWrite: false,
+  });
+  group.add(new THREE.Points(glowGeo, glowMat));
+  // wide soft underglow (fake bloom) — second layer, offset phase
+  const glowMat2 = new THREE.PointsMaterial({
+    map: glowTex, color: GOLD, size: 0.95, sizeAttenuation: true,
+    blending: THREE.AdditiveBlending, transparent: true, opacity: 0.16, depthWrite: false,
+  });
+  group.add(new THREE.Points(glowGeo, glowMat2));
 
   /* --- drifting particle field --- */
   const COUNT = 460;
@@ -121,7 +154,7 @@
   for (let i = 0; i < COUNT * 3; i++) pos[i] = (Math.random() - 0.5) * 46;
   const pGeo = new THREE.BufferGeometry();
   pGeo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-  const field = new THREE.Points(pGeo, new THREE.PointsMaterial({ color: GOLD, size: 0.05, transparent: true, opacity: 0.3 }));
+  const field = new THREE.Points(pGeo, new THREE.PointsMaterial({ color: GOLD, size: 0.05, transparent: true, opacity: 0.18 }));
   scene.add(field);
 
   /* --- interaction & motion --- */
@@ -131,8 +164,8 @@
     mouse.ty = e.clientY / window.innerHeight - 0.5;
   });
 
-  // sit to the right and lower so the antlers clear the headline
-  const targetOffsetX = () => (window.innerWidth > 1200 ? 5.6 : window.innerWidth > 860 ? 4.6 : 0);
+  // sit further to the right so the deer owns the right side, clear of the headline
+  const targetOffsetX = () => (window.innerWidth > 1200 ? 7.2 : window.innerWidth > 860 ? 5.6 : 0);
   const BASE_Y = -1.05;
 
   const clock = new THREE.Clock();
@@ -146,11 +179,18 @@
     // keep the delightful mouse parallax; calm the idle motion
     group.rotation.y = mouse.x * 0.5 + Math.sin(t * 0.35) * 0.12 * sway;
     group.rotation.x = -mouse.y * 0.22 + Math.sin(t * 0.5) * 0.04 * sway;
-    group.position.x += (targetOffsetX() - group.position.x) * 0.05;
+    group.position.x = targetOffsetX(); // start & stay in place — never slides across the name
     group.position.y = BASE_Y + Math.sin(t * 0.6) * 0.08 * sway;
     group.scale.setScalar(1 + Math.sin(t * 0.9) * 0.014);
 
+    // circuit-node glow: a slow heartbeat via opacity (not a strobe)
+    const pulse = reduce ? 1 : (1 + Math.sin(t * 1.6) * 0.12);
+    glowMat.size = 0.34 * pulse;
+    glowMat.opacity = reduce ? 0.5 : 0.42 + Math.abs(Math.sin(t * 1.6)) * 0.22;
+    glowMat2.opacity = reduce ? 0.14 : 0.12 + Math.abs(Math.sin(t * 1.6 + 0.5)) * 0.10;
+
     field.rotation.y = t * 0.02 * sway;
+    field.position.y = Math.sin(t * 0.1) * 0.4; // slow data drift
 
     camera.position.x += (mouse.x * 0.12 - camera.position.x) * 0.05;
     camera.position.y += (-mouse.y * 0.25 - camera.position.y) * 0.05;
