@@ -185,6 +185,8 @@ h1, h2, h3 { font-family: "Clash Display", sans-serif; font-weight: 600; line-he
 .edu__row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 .edu__row strong { display: block; }
 .edu__row span { color: var(--muted); font-size: .9rem; }
+.edu__row a { color: var(--accent); text-decoration: none; }
+.edu__row a:hover { text-decoration: underline; }
 @media (max-width: 640px){ .edu__row{ grid-template-columns: 1fr; } }
 
 /* ---------- SKILLS ---------- */
