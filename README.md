@@ -1,6 +1,6 @@
 # Adnan Abdul Salam — Personal Portfolio
 
-My personal portfolio website. Live at **https://adnanabdulsalam.github.io**
+My personal portfolio website. Live at **https://adnan-abdulsalam.github.io**
 
 Customer & technical support and sales professional (4+ years) based in Riga, Latvia,
 with an MSc in Computer Systems — now building things on the web.
