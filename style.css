@@ -150,7 +150,21 @@ h1, h2, h3 { font-family: "Clash Display", sans-serif; font-weight: 600; line-he
 .section__title { font-size: clamp(2rem, 5vw, 3.4rem); letter-spacing: -.01em; }
 
 /* ---------- ABOUT ---------- */
-.about__grid { display: grid; grid-template-columns: 1.2fr .9fr; gap: clamp(28px, 4vw, 60px); align-items: start; }
+.about__grid { display: grid; grid-template-columns: minmax(220px, 300px) 1fr; gap: clamp(28px, 4vw, 60px); align-items: start; }
+.about__portrait { position: relative; }
+.about__portrait img {
+  width: 100%; aspect-ratio: 1; object-fit: cover; display: block;
+  border-radius: 20px;
+  border: 1px solid rgba(232,181,62,.35);
+  box-shadow: 0 20px 55px rgba(0,0,0,.55);
+  transition: transform .45s var(--ease), box-shadow .45s var(--ease);
+}
+.about__portrait::after {
+  content: ""; position: absolute; inset: 0; border-radius: 20px; pointer-events: none;
+  background: linear-gradient(180deg, rgba(232,181,62,.06) 0%, transparent 35%, rgba(8,5,3,.45) 100%);
+}
+.about__portrait:hover img { transform: translateY(-5px); box-shadow: 0 26px 70px rgba(232,181,62,.16); }
+.about__text { display: flex; flex-direction: column; gap: 18px; }
 .about__lead { font-family: "Clash Display"; font-weight: 500; font-size: clamp(1.25rem, 2.4vw, 1.9rem); line-height: 1.3; }
 .about__body { color: var(--muted); }
 .stats { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 30px; }
@@ -162,7 +176,7 @@ h1, h2, h3 { font-family: "Clash Display", sans-serif; font-weight: 600; line-he
 .stat:hover { transform: translateY(-5px); border-color: rgba(232,181,62,.4); }
 .stat__num { display: block; font-family: "Clash Display"; font-weight: 700; font-size: clamp(1.8rem, 3.4vw, 2.8rem); color: var(--accent); }
 .stat__label { color: var(--muted); font-size: .85rem; }
-@media (max-width: 860px){ .about__grid{ grid-template-columns: 1fr; } .stats{ grid-template-columns: repeat(2,1fr);} }
+@media (max-width: 860px){ .about__grid{ grid-template-columns: 1fr; } .about__portrait{ max-width: 240px; } .stats{ grid-template-columns: repeat(2,1fr);} }
 
 /* ---------- TIMELINE ---------- */
 .timeline { list-style: none; position: relative; margin-left: 6px; }
